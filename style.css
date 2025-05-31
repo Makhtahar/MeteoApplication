@@ -1,0 +1,130 @@
+css
+/* Tailwind CSS - Included via CDN in HTML */
+/* Custom CSS additions */
+
+/* Base styles */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f8fafc;
+  color: #1e293b;
+  line-height: 1.6;
+}
+
+/* Header styles */
+.header {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.city-info {
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Current weather card */
+.current-weather {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.current-weather:hover {
+  transform: translateY(-5px);
+}
+
+.temperature {
+  font-size: 3.5rem;
+  font-weight: 300;
+}
+
+.weather-icon {
+  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+/* Transport status cards */
+.transport-card {
+  background: white;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.transport-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.status-on-time {
+  background-color: #10b981;
+}
+
+.status-delayed {
+  background-color: #f59e0b;
+}
+
+.status-cancelled {
+  background-color: #ef4444;
+}
+
+/* Forecast sections */
+.forecast-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.hourly-forecast-item {
+  border-right: 1px solid #e2e8f0;
+}
+
+.hourly-forecast-item:last-child {
+  border-right: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .temperature {
+    font-size: 2.5rem;
+  }
+  
+  .hourly-forecast-item {
+    border-right: none;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .hourly-forecast-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.delay-100 {
+  animation-delay: 0.1s;
+}
+
+.delay-200 {
+  animation-delay: 0.2s;
+}
+
+/* Loading state */
+.loading-spinner {
+  border-top-color: #3b82f6;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
