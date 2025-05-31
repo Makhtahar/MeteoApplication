@@ -58,6 +58,36 @@
         .forecast-container::-webkit-scrollbar-thumb:hover {
             background: rgba(255, 255, 255, 0.5);
         }
+        
+        /* Transport status indicators */
+        .transport-status {
+            transition: all 0.3s ease;
+        }
+        
+        .transport-status.good {
+            background-color: rgba(16, 185, 129, 0.2);
+            border-left: 4px solid #10b981;
+        }
+        
+        .transport-status.warning {
+            background-color: rgba(245, 158, 11, 0.2);
+            border-left: 4px solid #f59e0b;
+        }
+        
+        .transport-status.bad {
+            background-color: rgba(239, 68, 68, 0.2);
+            border-left: 4px solid #ef4444;
+        }
+        
+        /* Loading animation */
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        
+        .loading {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-blue-900 to-indigo-900 text-white min-h-screen flex flex-col">
@@ -150,6 +180,38 @@
                     </div>
                 </div>
                 
+                <!-- Transport status -->
+                <h3 class="text-xl font-semibold mb-4">État des transports</h3>
+                <div id="transport-status" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <div class="transport-status good p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-bus text-2xl mr-3 text-green-500"></i>
+                            <div>
+                                <h4 class="font-medium">Bus</h4>
+                                <p class="text-sm text-blue-200">Circulation normale</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="transport-status warning p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-train text-2xl mr-3 text-yellow-500"></i>
+                            <div>
+                                <h4 class="font-medium">Trains</h4>
+                                <p class="text-sm text-blue-200">Retards mineurs</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="transport-status bad p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-subway text-2xl mr-3 text-red-500"></i>
+                            <div>
+                                <h4 class="font-medium">Métro</h4>
+                                <p class="text-sm text-blue-200">Perturbations</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- Hourly forecast -->
                 <h3 class="text-xl font-semibold mb-4">Prévisions horaires</h3>
                 <div class="forecast-container overflow-x-auto pb-2">
@@ -194,7 +256,8 @@
             visibility: document.getElementById('visibility'),
             windGust: document.getElementById('wind-gust'),
             hourlyForecast: document.getElementById('hourly-forecast'),
-            dailyForecast: document.getElementById('daily-forecast')
+            dailyForecast: document.getElementById('daily-forecast'),
+            transportStatus: document.getElementById('transport-status')
         };
 
         // Weather icons mapping
@@ -256,6 +319,10 @@
             
             // Update every hour
             setInterval(fetchWeatherData, 3600000);
+            
+            // Simulate transport status updates
+            updateTransportStatus();
+            setInterval(updateTransportStatus, 30000);
         });
 
         // Fetch weather data from API
@@ -263,6 +330,7 @@
             try {
                 // Show loading state
                 elements.currentCondition.textContent = "Chargement des données...";
+                elements.currentIcon.innerHTML = '<i class="fas fa-circle-notch fa-spin loading"></i>';
                 
                 // Fetch current weather
                 const currentResponse = await fetch(`https://api.weatherapi.com/v1/current.json?key=${config.apiKey}&q=${config.city}&lang=${config.lang}`);
@@ -284,6 +352,7 @@
             } catch (error) {
                 console.error("Error fetching weather data:", error);
                 elements.currentCondition.textContent = "Erreur de chargement des données météo";
+                elements.currentIcon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
             }
         }
 
@@ -300,4 +369,47 @@
             
             // Set weather icon
             const iconClass = weatherIcons[current.condition.text] || "fa-question";
-            elements.currentIcon.innerHTML = `<i class="fas
+            elements.currentIcon.innerHTML = `<i class="fas ${iconClass}"></i>`;
+            
+            // Update comfort indices
+            elements.precipitation.textContent = `${current.precip_mm} mm`;
+            elements.uvIndex.textContent = current.uv;
+            elements.visibility.textContent = `${current.vis_km} km`;
+            elements.windGust.textContent = `${Math.round(current.gust_kph)} km/h`;
+        }
+
+        // Update hourly forecast
+        function updateHourlyForecast(data) {
+            const forecastHours = data.forecast.forecastday[0].hour;
+            const now = new Date();
+            const currentHour = now.getHours();
+            
+            // Clear previous forecast
+            elements.hourlyForecast.innerHTML = '';
+            
+            // Show next 12 hours
+            for (let i = currentHour; i < currentHour + 12; i++) {
+                const hour = forecastHours[i % 24];
+                const hourTime = new Date(hour.time);
+                
+                const hourElement = document.createElement('div');
+                hourElement.className = 'weather-card bg-black/20 rounded-lg p-4 text-center min-w-[80px]';
+                hourElement.innerHTML = `
+                    <div class="font-medium">${formatHour(hourTime)}</div>
+                    <div class="my-2 text-2xl">
+                        <i class="fas ${weatherIcons[hour.condition.text] || 'fa-question'}"></i>
+                    </div>
+                    <div class="font-semibold">${Math.round(hour.temp_c)}°</div>
+                    <div class="text-xs text-blue-200 mt-1">${Math.round(hour.chance_of_rain)}%</div>
+                `;
+                
+                elements.hourlyForecast.appendChild(hourElement);
+            }
+        }
+
+        // Update daily forecast
+        function updateDailyForecast(data) {
+            const forecastDays = data.forecast.forecastday;
+            
+            // Clear previous forecast
+            elements.d
