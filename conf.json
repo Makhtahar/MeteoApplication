@@ -1,0 +1,68 @@
+
+{
+  "app": {
+    "name": "Météo Transports",
+    "version": "1.0.0",
+    "author": "Your Name",
+    "description": "Dashboard combining weather and public transport information"
+  },
+  "api": {
+    "weather": {
+      "provider": "weatherapi",
+      "url": "https://api.weatherapi.com/v1",
+      "key": "YOUR_WEATHER_API_KEY",
+      "endpoints": {
+        "current": "/current.json",
+        "forecast": "/forecast.json"
+      }
+    },
+    "transport": {
+      "providers": [
+        {
+          "name": "city_transport_api",
+          "url": "https://api.citytransport.com/v1",
+          "key": "YOUR_TRANSPORT_API_KEY",
+          "endpoints": {
+            "status": "/status"
+          }
+        }
+      ]
+    }
+  },
+  "defaults": {
+    "city": "Paris",
+    "refreshInterval": 300000,
+    "units": {
+      "temperature": "C",
+      "wind": "km/h",
+      "pressure": "hPa"
+    }
+  },
+  "ui": {
+    "theme": {
+      "primaryColor": "#3B82F6",
+      "secondaryColor": "#10B981",
+      "dangerColor": "#EF4444",
+      "warningColor": "#F59E0B"
+    },
+    "transportIcons": {
+      "metro": "fas fa-subway",
+      "bus": "fas fa-bus",
+      "tram": "fas fa-tram",
+      "bike": "fas fa-bicycle"
+    },
+    "statusColors": {
+      "normal": "text-green-600",
+      "disrupted": "text-yellow-600",
+      "stopped": "text-red-600"
+    }
+  },
+  "features": {
+    "currentWeather": true,
+    "hourlyForecast": true,
+    "dailyForecast": true,
+    "transportStatus": true,
+    "geolocation": true,
+    "citySelection": true
+  }
+}

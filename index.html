@@ -3,90 +3,264 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transport & Météo</title>
+    <title>Météo Transports - Affichage en Temps Réel</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 </head>
-<body class="bg-gray-100">
-    <div class="container mx-auto px-4 py-8">
-        <header class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-blue-800">Transport & Météo Lyon</h1>
-            <p class="text-gray-600 mt-2">Informations en temps réel</p>
+<body class="bg-gray-50 font-sans">
+    <div class="container mx-auto px-4 py-6 max-w-6xl">
+        <!-- Header with city name and last update -->
+        <header class="bg-gradient-to-r from-blue-700 to-blue-900 text-white rounded-2xl shadow-xl mb-8 p-6 relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-white/10 to-white/5"></div>
+            <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center">
+                <div>
+                    <div class="flex items-center">
+                        <i class="fas fa-bus mr-3 text-2xl"></i>
+                        <h1 id="city-name" class="text-3xl md:text-4xl font-bold tracking-tight">Chargement...</h1>
+                    </div>
+                    <p id="current-date" class="text-blue-100 mt-1 text-sm md:text-base"></p>
+                </div>
+                <div class="mt-4 md:mt-0 flex items-center">
+                    <span id="last-update" class="text-blue-200 text-sm mr-3">Dernière mise à jour: --:--</span>
+                    <div id="current-weather-icon" class="text-4xl md:text-5xl">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </div>
+                </div>
+            </div>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Current Weather -->
-            <div class="bg-white rounded-xl shadow-lg p-6">
-                <h2 class="text-xl font-semibold mb-4 text-blue-700">Météo Actuelle</h2>
-                <div id="current-weather" class="text-center">
-                    <div class="animate-pulse flex space-x-4">
-                        <div class="flex-1 space-y-4 py-1">
-                            <div class="h-4 bg-gray-300 rounded w-3/4"></div>
-                            <div class="space-y-2">
-                                <div class="h-4 bg-gray-300 rounded"></div>
-                                <div class="h-4 bg-gray-300 rounded w-5/6"></div>
+        <!-- Main content grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Current weather card -->
+            <div class="weather-card bg-white rounded-2xl shadow-lg p-6 animate-fade-in col-span-1 lg:col-span-2">
+                <div class="flex justify-between items-start mb-4">
+                    <h2 class="text-xl font-semibold text-gray-800">Conditions actuelles</h2>
+                    <div class="flex items-center bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs">
+                        <i class="fas fa-sync-alt mr-1"></i>
+                        <span>En direct</span>
+                    </div>
+                </div>
+                <div class="flex flex-col md:flex-row items-center justify-between">
+                    <div class="flex items-center mb-4 md:mb-0">
+                        <div id="current-temp" class="text-7xl font-light mr-4">--°C</div>
+                        <div class="border-l border-gray-200 pl-4">
+                            <p id="weather-desc" class="text-gray-700 text-lg font-medium">--</p>
+                            <div class="flex items-center mt-2 text-gray-600">
+                                <i class="fas fa-wind mr-2"></i>
+                                <span id="wind-speed">-- km/h</span>
+                            </div>
+                            <div class="flex items-center mt-1 text-gray-600">
+                                <i class="fas fa-tint mr-2"></i>
+                                <span id="humidity">--%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-blue-50 rounded-xl p-4 w-full md:w-auto">
+                        <h3 class="text-sm font-semibold text-blue-800 mb-2">Indice de confort</h3>
+                        <div class="flex items-center">
+                            <div id="comfort-icon" class="text-3xl text-blue-600 mr-3">
+                                <i class="fas fa-thermometer-half"></i>
+                            </div>
+                            <div>
+                                <p id="feels-like" class="font-medium">Ressenti: --°C</p>
+                                <p id="uv-index" class="text-sm">UV: -- (--)</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Transport Status -->
-            <div class="bg-white rounded-xl shadow-lg p-6">
-                <h2 class="text-xl font-semibold mb-4 text-blue-700">État des Transports</h2>
-                <div id="transport-status" class="space-y-4">
-                    <div class="animate-pulse flex space-x-4">
-                        <div class="flex-1 space-y-4 py-1">
-                            <div class="h-4 bg-gray-300 rounded w-3/4"></div>
-                            <div class="space-y-2">
-                                <div class="h-4 bg-gray-300 rounded"></div>
-                                <div class="h-4 bg-gray-300 rounded w-5/6"></div>
+            <!-- Transport alerts -->
+            <div class="weather-card bg-white rounded-2xl shadow-lg p-6 animate-fade-in">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Alertes transports</h2>
+                <div id="transport-alerts" class="space-y-3">
+                    <div class="bg-yellow-50 border-l-4 border-yellow-500 p-3 rounded-r">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 text-yellow-500">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-yellow-700">Chargement des alertes...</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Hourly Forecast -->
-            <div class="bg-white rounded-xl shadow-lg p-6">
-                <h2 class="text-xl font-semibold mb-4 text-blue-700">Prévision Horaires</h2>
-                <div id="hourly-forecast" class="overflow-x-auto">
-                    <div class="animate-pulse flex space-x-4">
-                        <div class="flex-1 space-y-4 py-1">
-                            <div class="h-4 bg-gray-300 rounded w-3/4"></div>
-                            <div class="space-y-2">
-                                <div class="h-4 bg-gray-300 rounded"></div>
-                                <div class="h-4 bg-gray-300 rounded w-5/6"></div>
-                            </div>
-                        </div>
+            <!-- Hourly forecast -->
+            <div class="weather-card bg-white rounded-2xl shadow-lg p-6 animate-fade-in">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Prévisions horaires</h2>
+                <div id="hourly-forecast" class="grid grid-cols-4 gap-2">
+                    <!-- Will be populated by JS -->
+                </div>
+            </div>
+
+            <!-- Daily forecast -->
+            <div class="weather-card bg-white rounded-2xl shadow-lg p-6 animate-fade-in">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Prévisions sur 5 jours</h2>
+                <div id="daily-forecast" class="space-y-3">
+                    <!-- Will be populated by JS -->
+                </div>
+            </div>
+
+            <!-- Transport status -->
+            <div class="weather-card bg-white rounded-2xl shadow-lg p-6 animate-fade-in lg:col-span-2">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold text-gray-800">État des lignes</h2>
+                    <div class="text-sm text-gray-500">
+                        <i class="fas fa-clock mr-1"></i>
+                        <span>Mis à jour à <span id="transport-update-time">--:--</span></span>
                     </div>
+                </div>
+                <div id="transport-status" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Will be populated by JS -->
                 </div>
             </div>
         </div>
 
-        <!-- 3-Day Forecast -->
-        <div class="mt-8 bg-white rounded-xl shadow-lg p-6">
-            <h2 class="text-xl font-semibold mb-4 text-blue-700">Prévision sur 3 Jours</h2>
-            <div id="daily-forecast" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div class="animate-pulse flex space-x-4">
-                    <div class="flex-1 space-y-4 py-1">
-                        <div class="h-4 bg-gray-300 rounded w-3/4"></div>
-                        <div class="space-y-2">
-                            <div class="h-4 bg-gray-300 rounded"></div>
-                            <div class="h-4 bg-gray-300 rounded w-5/6"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <footer class="mt-8 text-center text-gray-500 text-sm">
-            <p>Dernière mise à jour: <span id="last-update">-</span></p>
-            <p class="mt-2">Données fournies par WeatherAPI.com</p>
+        <!-- Footer with next update info -->
+        <footer class="text-center text-gray-500 text-sm mt-8">
+            <p>Prochaine mise à jour automatique dans <span id="next-update" class="font-medium">--:--</span></p>
+            <p class="mt-1">Données météo fournies par OpenWeatherMap • Système de transport de <span id="city-footer">--</span></p>
         </footer>
+
+        <!-- Loading indicator -->
+        <div id="loading" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 hidden">
+            <div class="bg-white p-8 rounded-2xl shadow-2xl text-center max-w-sm w-full">
+                <div class="loading-spinner h-16 w-16 border-4 border-gray-300 rounded-full mx-auto mb-6"></div>
+                <h3 class="text-lg font-medium text-gray-800 mb-2">Chargement des données</h3>
+                <p class="text-gray-600">Veuillez patienter pendant la mise à jour des informations...</p>
+            </div>
+        </div>
     </div>
 
-    <script src="js/meteo.js"></script>
-</body>
-</html>
+    <script>
+        // Configuration
+        const config = {
+            city: "Lyon",
+            transportNetwork: "TCL",
+            updateInterval: 3600000, // 1 hour in milliseconds
+            apiKey: "YOUR_API_KEY" // In a real app, this would be in a separate config file
+        };
+
+        // DOM Elements
+        const elements = {
+            cityName: document.getElementById('city-name'),
+            currentTemp: document.getElementById('current-temp'),
+            weatherIcon: document.getElementById('current-weather-icon'),
+            weatherDesc: document.getElementById('weather-desc'),
+            windSpeed: document.getElementById('wind-speed'),
+            humidity: document.getElementById('humidity'),
+            currentDate: document.getElementById('current-date'),
+            lastUpdate: document.getElementById('last-update'),
+            nextUpdate: document.getElementById('next-update'),
+            transportUpdateTime: document.getElementById('transport-update-time'),
+            hourlyForecast: document.getElementById('hourly-forecast'),
+            dailyForecast: document.getElementById('daily-forecast'),
+            transportStatus: document.getElementById('transport-status'),
+            transportAlerts: document.getElementById('transport-alerts'),
+            feelsLike: document.getElementById('feels-like'),
+            uvIndex: document.getElementById('uv-index'),
+            comfortIcon: document.getElementById('comfort-icon'),
+            cityFooter: document.getElementById('city-footer'),
+            loading: document.getElementById('loading')
+        };
+
+        // Weather icons mapping
+        const weatherIcons = {
+            '01d': 'sun',           // clear sky (day)
+            '01n': 'moon',          // clear sky (night)
+            '02d': 'cloud-sun',     // few clouds (day)
+            '02n': 'cloud-moon',    // few clouds (night)
+            '03d': 'cloud',         // scattered clouds
+            '03n': 'cloud',
+            '04d': 'cloud',         // broken clouds
+            '04n': 'cloud',
+            '09d': 'cloud-rain',    // shower rain
+            '09n': 'cloud-rain',
+            '10d': 'cloud-sun-rain',// rain (day)
+            '10n': 'cloud-moon-rain',// rain (night)
+            '11d': 'bolt',          // thunderstorm
+            '11n': 'bolt',
+            '13d': 'snowflake',     // snow
+            '13n': 'snowflake',
+            '50d': 'smog',          // mist/fog
+            '50n': 'smog'
+        };
+
+        // UV index levels
+        const uvIndexLevels = [
+            { max: 2, level: "Faible", color: "green" },
+            { max: 5, level: "Modéré", color: "yellow" },
+            { max: 7, level: "Élevé", color: "orange" },
+            { max: 10, level: "Très élevé", color: "red" },
+            { max: Infinity, level: "Extrême", color: "purple" }
+        ];
+
+        // Initialize the app
+        async function initApp() {
+            showLoading(true);
+            
+            try {
+                // Set current date
+                updateCurrentDate();
+                
+                // Update city name in footer
+                elements.cityFooter.textContent = config.city;
+                
+                // Fetch weather data (simulated)
+                const weatherData = await fetchWeatherData(config.city);
+                updateWeatherUI(weatherData);
+                
+                // Fetch transport data (simulated)
+                const transportData = await fetchTransportData();
+                updateTransportUI(transportData);
+                
+                // Set up automatic refresh
+                setInterval(async () => {
+                    console.log("Mise à jour automatique des données...");
+                    const newWeatherData = await fetchWeatherData(config.city);
+                    updateWeatherUI(newWeatherData);
+                    
+                    const newTransportData = await fetchTransportData();
+                    updateTransportUI(newTransportData);
+                }, config.updateInterval);
+                
+                // Update next update countdown
+                updateNextUpdateCountdown();
+                
+            } catch (error) {
+                console.error("Erreur lors du chargement des données:", error);
+                showError("Une erreur est survenue lors du chargement des données. Veuillez réessayer.");
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Simulate weather API fetch
+        async function fetchWeatherData(city) {
+            // In a real app, this would be an actual API call:
+            // const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&lang=fr&appid=${config.apiKey}`);
+            // const data = await response.json();
+            
+            // Simulated response
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    const now = new Date();
+                    const hours = now.getHours();
+                    const isDayTime = hours > 6 && hours < 20;
+                    
+                    // Generate random weather conditions based on time of day
+                    let weatherCondition, iconCode;
+                    const rand = Math.random();
+                    
+                    if (rand < 0.6) {
+                        weatherCondition = isDayTime ? "Ensoleillé" : "Dégagé";
+                        iconCode = isDayTime ? "01d" : "01n";
+                    } else if (rand < 0.8) {
+                        weatherCondition = isDayTime ? "Partiellement nuageux" : "Nuageux";
+                        iconCode
+// (Your JavaScript code continues here. Complete your script logic.)
+// Make sure to close all functions and script tags properly.
+// Place the closing </html> tag at the very end of the file after your script.

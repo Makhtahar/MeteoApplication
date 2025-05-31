@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather & Transport Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .weather-card {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%);
+        }
+        .transport-card {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
+        }
+        .loading-spinner {
+            border-top-color: #3B82F6;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="mb-8">
+            <h1 id="app-title" class="text-3xl font-bold text-center text-gray-800">Loading Dashboard...</h1>
+            <div class="flex justify-center mt-4">
+                <div class="relative w-full max-w-md">
+                    <input type="text" id="city-input" placeholder="Search city..." 
+                           class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <button id="search-btn" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-blue-600">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Loading State -->
+        <div id="loading-state" class="flex flex-col items-center justify-center py-12">
+            <div class="loading-spinner h-12 w-12 border-4 border-gray-200 rounded-full mb-4"></div>
+            <p class="text-gray-600">Loading configuration and data...</p>
+        </div>
+
+        <!-- Main Content (initially hidden) -->
+        <div id="main-content" class="hidden">
+            <!-- Weather Section -->
+            <section id="weather-section" class="mb-8">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-700 flex items-center">
+                    <i class="fas fa-cloud-sun mr-2"></i>
+                    <span>Weather Information</span>
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Current Weather -->
+                    <div id="current-weather" class="weather-card rounded-xl p-6 shadow-md">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-medium">Current Weather</h3>
+                            <div id="current-date" class="text-gray-600"></div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div id="current-temp" class="text-5xl font-bold mb-2">--°</div>
+                                <div id="current-condition" class="text-gray-600">--</div>
+                            </div>
+                            <div id="current-icon" class="text-6xl">
+                                <i class="fas fa-question"></i>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 mt-6">
+                            <div class="flex items-center">
+                                <i class="fas fa-wind mr-2 text-gray-500"></i>
+                                <span id="current-wind">-- km/h</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-tint mr-2 text-gray-500"></i>
+                                <span id="current-humidity">--%</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-temperature-low mr-2 text-gray-500"></i>
+                                <span id="current-feelslike">--°</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-compress-alt mr-2 text-gray-500"></i>
+                                <span id="current-pressure">-- hPa</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Hourly Forecast -->
+                    <div id="hourly-forecast" class="weather-card rounded-xl p-6 shadow-md">
+                        <h3 class="text-xl font-medium mb-4">Hourly Forecast</h3>
+                        <div id="hourly-container" class="space-y-4">
+                            <!-- Will be populated by JS -->
+                        </div>
+                    </div>
+                    
+                    <!-- Daily Forecast -->
+                    <div id="daily-forecast" class="weather-card rounded-xl p-6 shadow-md">
+                        <h3 class="text-xl font-medium mb-4">Daily Forecast</h3>
+                        <div id="daily-container" class="space-y-4">
+                            <!-- Will be populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Transport Section -->
+            <section id="transport-section">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-700 flex items-center">
+                    <i class="fas fa-subway mr-2"></i>
+                    <span>Transport Status</span>
+                </h2>
+                
+                <div id="transport-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Will be populated by JS -->
+                </div>
+            </section>
+        </div>
+
+        <!-- Error State -->
+        <div id="error-state" class="hidden flex flex-col items-center justify-center py-12">
+            <i class="fas fa-exclamation-triangle text-red-500 text-5xl mb-4"></i>
+            <h2 class="text-2xl font-semibold text-gray-800 mb-2">Something went wrong</h2>
+            <p id="error-message" class="text-gray-600 mb-6">Failed to load configuration or data.</p>
+            <button id="retry-btn" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+                <i class="fas fa-sync-alt mr-2"></i> Try Again
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let config = {};
+        let weatherData = null;
+        let transportData = null;
+        let currentCity = '';
+
+        // DOM Elements
+        const loadingState = document.getElementById('loading-state');
+        const mainContent = document.getElementById('main-content');
+        const errorState = document.getElementById('error-state');
+        const errorMessage = document.getElementById('error-message');
+        const retryBtn = document.getElementById('retry-btn');
+        const cityInput = document.getElementById('city-input');
+        const searchBtn = document.getElementById('search-btn');
+        const appTitle = document.getElementById('app-title');
+
+        // Initialize the application
+        async function initApp() {
+            try {
+                showLoading();
+                
+                // Load configuration
+                const response = await fetch('conf.json');
+                if (!response.ok) throw new Error('Failed to load configuration');
+                config = await response.json();
+                
+                // Update UI based on config
+                updateUIFromConfig();
+                
+                // Set default city
+                currentCity = config.defaults.city;
+                cityInput.value = currentCity;
+                
+                // Load data
+                await loadData();
+                
+                showMainContent();
+            } catch (error) {
+                console.error('Initialization error:', error);
+                showError(error.message);
+            }
+        }
+
+        // Update UI elements based on configuration
+        function updateUIFromConfig() {
+            // Set app title
+            appTitle.textContent = config.app.name;
+            
+            // Show/hide sections based on feature flags
+            document.getElementById('weather-section').style.display = 
+                config.features.currentWeather ? 'block' : 'none';
+            document.getElementById('hourly-forecast').style.display = 
+                config.features.hourlyForecast ? 'block' : 'none';
+            document.getElementById('daily-forecast').style.display = 
+                config.features.dailyForecast ? 'block' : 'none';
+            document.getElementById('transport-section').style.display = 
+                config.features.transportStatus ? 'block' : 'none';
+            
+            // Hide city selection if disabled
+            document.querySelector('header').style.display = 
+                config.features.citySelection ? 'block' : 'none';
+        }
+
+        // Load weather and transport data
+        async function loadData() {
+            try {
+                // Simulate API calls (in a real app, these would be actual fetch calls)
+                weatherData = await simulateWeatherAPI(currentCity);
+                transportData = await simulateTransportAPI();
+                
+                // Update the UI with the new data
+                updateWeatherUI();
+                updateTransportUI();
+            } catch (error) {
+                console.error('Data loading error:', error);
+                throw error;
+            }
+        }
+
+        // Simulate weather API call
+        async function simulateWeatherAPI(city) {
+            // In a real app, this would be:
+            // const response = await fetch(`${config.api.weather.url}${config.api.weather.endpoints.current}?key=${config.api.weather.key}&q=${city}`);
+            // return await response.json();
+            
+            // Simulated response
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    resolve({
+                        location: {
+                            name: city,
+                            localtime: new Date().toISOString()
+                        },
+                        current: {
+                            temp_c: Math.round(Math.random() * 30),
+                            temp_f: Math.round(Math.random() * 86),
+                            condition: {
+                                text: ['Sunny', 'Cloudy', 'Rainy', 'Partly Cloudy'][Math.floor(Math.random() * 4)],
+                                icon: '//cdn.weatherapi.com/weather/64x64/day/113.png'
+                            },
+                            wind_kph: Math.round(Math.random() * 30),
+                            humidity: Math.round(Math.random() * 100),
+                            feelslike_c: Math.round(Math.random() * 30),
+                            pressure_mb: Math.round(900 + Math.random() * 200)
+                        }
+                    });
+                }, 800);
+            });
+        }
+
+        // Simulate transport API call
+        async function simulateTransportAPI() {
+            // In a real app, this would be:
+            // const response = await fetch(`${config.api.transport.providers[0].url}${config.api.transport.providers[0].endpoints.status}?key=${config.api.transport.providers[0].key}`);
+            // return await response.json();
+            
+            // Simulated response
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    resolve({
+                        lines: [
+                            { id: 'metro-1', name: 'Metro Line 1', status: 'normal', icon: 'metro' },
+                            { id: 'metro-2', name: 'Metro Line 2', status: 'disrupted', icon: 'metro' },
+                            { id: 'bus-38', name: 'Bus 38', status: 'normal', icon: 'bus' },
+                            { id: 'tram-3', name: 'Tram 3', status: 'stopped', icon: 'tram' },
+                            { id: 'bike', name: 'City Bikes', status: 'normal', icon: 'bike' }
+                        ]
+                    });
+                }, 800);
+            });
+        }
+
+        // Update weather UI with current data
+        function updateWeatherUI() {
+            if (!weatherData) return;
+            
+            const current = weatherData.current;
+            const location = weatherData.location;
+            
+            // Current date
+            const date = new Date(location.localtime);
+            document.getElementById('current-date').textContent = date.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+            
+            // Current temperature
+            const tempUnit = config.defaults.units.temperature === 'C' ? 'current.temp_c' : 'current.temp_f';
+            document.getElementById('current-temp').textContent = 
+                `${config.defaults.units.temperature === 'C' ? current.temp_c : current.temp_f}°${config.defaults.units.temperature}`;
+            
+            // Current condition
+            document.getElementById('current-condition').textContent = current.condition.text;
+            
+            // Weather icon (simplified - in real app would use actual icon from API)
+            const iconMap = {
+                'Sunny': 'fa-sun',
+                'Cloudy': 'fa-cloud',
+                'Rainy': 'fa-cloud-rain',
+                'Partly Cloudy': 'fa-cloud-sun'
+            };
+            const icon = iconMap[current.condition.text] || 'fa-question';
+            document.getElementById('current-icon').innerHTML = `<i class="fas ${icon}"></i>`;
+            
+            // Additional weather info
+            document.getElementById('current-wind').textContent = 
+                `${current.wind_kph} ${config.defaults.units.wind}`;
+            document.getElementById('current-humidity').textContent = `${current.humidity}%`;
+            document.getElementById('current-feelslike').textContent = 
+                `${config.defaults.units.temperature === 'C' ? current.feelslike_c : current.feelslike_f}°${config.defaults.units.temperature}`;
+            document.getElementById('current-pressure').textContent = 
+                `${current.pressure_mb} ${config.defaults.units.pressure}`;
+            
+            // Update hourly forecast (simplified)
+            if (config.features.hourlyForecast) {
+                const hourlyContainer = document.getElementById('hourly-container');
+                hourlyContainer.innerHTML = '';
+                
+                for (let i = 0; i < 5; i++) {
+                    const hour = new Date();
+                    hour.setHours(date.getHours() + i);
+                    const hourLabel = hour.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                    const temp = config.defaults.units.temperature === 'C'
+                        ? current.temp_c + i
+                        : current.temp_f + i;
+                    const icon = iconMap[current.condition.text] || 'fa-question';
+                    const condition = current.condition.text;
+                    hourlyContainer.innerHTML += `
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-700">${hourLabel}</span>
+                            <span class="flex items-center">
+                                <i class="fas ${icon} mr-2"></i>
+                                <span>${temp}°${config.defaults.units.temperature}</span>
+                                <span class="ml-2 text-gray-500">${condition}</span>
+                            </span>
+                        </div>
+                    `;
+                }
+            }
+
+            // Update daily forecast (simplified)
+            if (config.features.dailyForecast) {
+                const dailyContainer = document.getElementById('daily-container');
+                dailyContainer.innerHTML = '';
+                for (let i = 0; i < 5; i++) {
+                    const day = new Date();
+                    day.setDate(date.getDate() + i);
+                    const dayLabel = day.toLocaleDateString('en-US', { weekday: 'short' });
+                    const tempHigh = (config.defaults.units.temperature === 'C'
+                        ? current.temp_c + 2 + i
+                        : current.temp_f + 4 + i);
+                    const tempLow = (config.defaults.units.temperature === 'C'
+                        ? current.temp_c - 2 - i
+                        : current.temp_f - 4 - i);
+                    const icon = iconMap[current.condition.text] || 'fa-question';
+                    dailyContainer.innerHTML += `
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-700">${dayLabel}</span>
+                            <span class="flex items-center">
+                                <i class="fas ${icon} mr-2"></i>
+                                <span>${tempHigh}° / ${tempLow}°${config.defaults.units.temperature}</span>
+                            </span>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        // Update transport UI with current data
+        function updateTransportUI() {
+            if (!transportData) return;
+            const container = document.getElementById('transport-container');
+            container.innerHTML = '';
+            transportData.lines.forEach(line => {
+                let statusColor = 'text-green-600';
+                let statusText = 'Normal';
+                if (line.status === 'disrupted') {
+                    statusColor = 'text-yellow-600';
+                    statusText = 'Disrupted';
+                } else if (line.status === 'stopped') {
+                    statusColor = 'text-red-600';
+                    statusText = 'Stopped';
+                }
+                let iconClass = 'fa-question';
+                if (line.icon === 'metro') iconClass = 'fa-subway';
+                else if (line.icon === 'bus') iconClass = 'fa-bus';
+                else if (line.icon === 'tram') iconClass = 'fa-train-tram';
+                else if (line.icon === 'bike') iconClass = 'fa-bicycle';
+
+                container.innerHTML += `
+                    <div class="transport-card rounded-xl p-6 shadow-md flex flex-col items-center">
+                        <i class="fas ${iconClass} text-4xl mb-2"></i>
+                        <div class="font-semibold text-gray-800 mb-1">${line.name}</div>
+                        <div class="${statusColor} font-medium">${statusText}</div>
+                    </div>
+                `;
+            });
+        }
+
+        // Show loading state
+        function showLoading() {
+            loadingState.classList.remove('hidden');
+            mainContent.classList.add('hidden');
+            errorState.classList.add('hidden');
+        }
+
+        // Show main content
+        function showMainContent() {
+            loadingState.classList.add('hidden');
+            mainContent.classList.remove('hidden');
+            errorState.classList.add('hidden');
+        }
+
+        // Show error state
+        function showError(message) {
+            loadingState.classList.add('hidden');
+            mainContent.classList.add('hidden');
+            errorState.classList.remove('hidden');
+            errorMessage.textContent = message;
+        }
+
+        // Event listeners
+        retryBtn.addEventListener('click', initApp);
+        searchBtn.addEventListener('click', async () => {
+            currentCity = cityInput.value.trim() || config.defaults.city;
+            showLoading();
+            try {
+                await loadData();
+                showMainContent();
+            } catch (error) {
+                showError(error.message);
+            }
+        });
+        cityInput.addEventListener('keydown', async (e) => {
+            if (e.key === 'Enter') {
+                currentCity = cityInput.value.trim() || config.defaults.city;
+                showLoading();
+                try {
+                    await loadData();
+                    showMainContent();
+                } catch (error) {
+                    showError(error.message);
+                }
+            }
+        });
+
+        // Start the app
+        window.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
