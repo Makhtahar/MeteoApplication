@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Météo Transports</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .fade-in {
+            animation: fadeIn 1s ease-in-out;
+        }
+        
+        .weather-card {
+            transition: all 0.3s ease;
+        }
+        
+        .weather-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .temperature-display {
+            font-size: 4rem;
+            font-weight: 300;
+            line-height: 1;
+        }
+        
+        .weather-icon {
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+        }
+        
+        .last-updated {
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+        
+        /* Custom scrollbar for forecast */
+        .forecast-container::-webkit-scrollbar {
+            height: 6px;
+        }
+        
+        .forecast-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        
+        .forecast-container::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+        
+        .forecast-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-900 to-indigo-900 text-white min-h-screen flex flex-col">
+    <div class="container mx-auto px-4 py-8 flex-grow flex flex-col">
+        <!-- Header with city name and transport logo -->
+        <header class="flex justify-between items-center mb-8">
+            <div>
+                <h1 id="city-name" class="text-3xl font-bold">Chargement...</h1>
+                <p class="text-blue-200">Information météo pour les transports</p>
+            </div>
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-bus text-3xl text-yellow-400"></i>
+                <i class="fas fa-train text-3xl text-blue-300"></i>
+                <i class="fas fa-subway text-3xl text-red-300"></i>
+            </div>
+        </header>
+        
+        <!-- Main weather display -->
+        <main class="flex-grow">
+            <div class="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl fade-in">
+                <!-- Current weather -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="md:col-span-2">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 class="text-2xl font-semibold">Météo actuelle</h2>
+                                <p id="current-date" class="text-blue-200"></p>
+                            </div>
+                            <div id="last-updated" class="last-updated"></div>
+                        </div>
+                        
+                        <div class="flex items-center mt-6">
+                            <div class="temperature-display mr-4" id="current-temp">--°</div>
+                            <div class="weather-icon text-6xl mr-6" id="current-icon">
+                                <i class="fas fa-question"></i>
+                            </div>
+                            <div>
+                                <div class="text-xl font-medium" id="current-condition">Chargement...</div>
+                                <div class="text-blue-200" id="current-feels-like">Ressenti: --°</div>
+                                <div class="text-blue-200" id="current-humidity">Humidité: --%</div>
+                                <div class="text-blue-200" id="current-wind">Vent: -- km/h</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-black/20 rounded-xl p-4 flex flex-col justify-between">
+                        <h3 class="text-lg font-medium mb-4">Indices de confort</h3>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center mr-3">
+                                    <i class="fas fa-umbrella"></i>
+                                </div>
+                                <div>
+                                    <div class="text-sm text-blue-200">Précipitation</div>
+                                    <div id="precipitation" class="font-medium">-- mm</div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center mr-3">
+                                    <i class="fas fa-sun"></i>
+                                </div>
+                                <div>
+                                    <div class="text-sm text-blue-200">UV</div>
+                                    <div id="uv-index" class="font-medium">--</div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center mr-3">
+                                    <i class="fas fa-eye"></i>
+                                </div>
+                                <div>
+                                    <div class="text-sm text-blue-200">Visibilité</div>
+                                    <div id="visibility" class="font-medium">-- km</div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 rounded-full bg-yellow-500 flex items-center justify-center mr-3">
+                                    <i class="fas fa-wind"></i>
+                                </div>
+                                <div>
+                                    <div class="text-sm text-blue-200">Rafales</div>
+                                    <div id="wind-gust" class="font-medium">-- km/h</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Hourly forecast -->
+                <h3 class="text-xl font-semibold mb-4">Prévisions horaires</h3>
+                <div class="forecast-container overflow-x-auto pb-2">
+                    <div id="hourly-forecast" class="flex space-x-4 min-w-max pb-2"></div>
+                </div>
+                
+                <!-- Daily forecast -->
+                <h3 class="text-xl font-semibold mt-8 mb-4">Prévisions sur 3 jours</h3>
+                <div id="daily-forecast" class="grid grid-cols-1 sm:grid-cols-3 gap-4"></div>
+            </div>
+        </main>
+        
+        <!-- Footer with transport info -->
+        <footer class="mt-8 text-center text-blue-200 text-sm">
+            <p>Informations météo actualisées toutes les heures</p>
+            <p class="mt-1">© 2025 Service des Transports Urbains</p>
+        </footer>
+    </div>
+
+    <script>
+        // Configuration - would normally be in conf.json
+        const config = {
+            city: "Lyon",
+            apiKey: "7a9c3f5e6b2d4c1e8b6150329231206", // Normally this would be secured
+            days: 3,
+            lang: "fr"
+        };
+
+        // DOM elements
+        const elements = {
+            cityName: document.getElementById('city-name'),
+            currentDate: document.getElementById('current-date'),
+            currentTemp: document.getElementById('current-temp'),
+            currentIcon: document.getElementById('current-icon'),
+            currentCondition: document.getElementById('current-condition'),
+            currentFeelsLike: document.getElementById('current-feels-like'),
+            currentHumidity: document.getElementById('current-humidity'),
+            currentWind: document.getElementById('current-wind'),
+            lastUpdated: document.getElementById('last-updated'),
+            precipitation: document.getElementById('precipitation'),
+            uvIndex: document.getElementById('uv-index'),
+            visibility: document.getElementById('visibility'),
+            windGust: document.getElementById('wind-gust'),
+            hourlyForecast: document.getElementById('hourly-forecast'),
+            dailyForecast: document.getElementById('daily-forecast')
+        };
+
+        // Weather icons mapping
+        const weatherIcons = {
+            "Sunny": "fa-sun",
+            "Clear": "fa-moon",
+            "Partly cloudy": "fa-cloud-sun",
+            "Cloudy": "fa-cloud",
+            "Overcast": "fa-cloud",
+            "Mist": "fa-smog",
+            "Patchy rain possible": "fa-cloud-rain",
+            "Patchy snow possible": "fa-snowflake",
+            "Patchy sleet possible": "fa-cloud-meatball",
+            "Patchy freezing drizzle possible": "fa-icicles",
+            "Thundery outbreaks possible": "fa-bolt",
+            "Blowing snow": "fa-wind",
+            "Blizzard": "fa-wind",
+            "Fog": "fa-smog",
+            "Freezing fog": "fa-smog",
+            "Patchy light drizzle": "fa-cloud-rain",
+            "Light rain": "fa-cloud-rain",
+            "Moderate rain": "fa-cloud-showers-heavy",
+            "Heavy rain": "fa-cloud-showers-heavy",
+            "Light freezing rain": "fa-cloud-rain",
+            "Moderate or heavy freezing rain": "fa-cloud-rain",
+            "Light sleet": "fa-cloud-meatball",
+            "Moderate or heavy sleet": "fa-cloud-meatball",
+            "Patchy light snow": "fa-snowflake",
+            "Light snow": "fa-snowflake",
+            "Moderate snow": "fa-snowflake",
+            "Heavy snow": "fa-snowflake",
+            "Ice pellets": "fa-icicles",
+            "Light rain shower": "fa-cloud-rain",
+            "Moderate or heavy rain shower": "fa-cloud-showers-heavy",
+            "Torrential rain shower": "fa-cloud-showers-heavy",
+            "Light sleet showers": "fa-cloud-meatball",
+            "Moderate or heavy sleet showers": "fa-cloud-meatball",
+            "Light snow showers": "fa-snowflake",
+            "Moderate or heavy snow showers": "fa-snowflake",
+            "Light showers of ice pellets": "fa-icicles",
+            "Moderate or heavy showers of ice pellets": "fa-icicles",
+            "Patchy light rain with thunder": "fa-bolt",
+            "Moderate or heavy rain with thunder": "fa-bolt",
+            "Patchy light snow with thunder": "fa-bolt",
+            "Moderate or heavy snow with thunder": "fa-bolt"
+        };
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set current date
+            const now = new Date();
+            elements.currentDate.textContent = formatDate(now);
+            
+            // Set city name
+            elements.cityName.textContent = config.city;
+            
+            // Load weather data
+            fetchWeatherData();
+            
+            // Update every hour
+            setInterval(fetchWeatherData, 3600000);
+        });
+
+        // Fetch weather data from API
+        async function fetchWeatherData() {
+            try {
+                // Show loading state
+                elements.currentCondition.textContent = "Chargement des données...";
+                
+                // Fetch current weather
+                const currentResponse = await fetch(`https://api.weatherapi.com/v1/current.json?key=${config.apiKey}&q=${config.city}&lang=${config.lang}`);
+                const currentData = await currentResponse.json();
+                
+                // Fetch forecast
+                const forecastResponse = await fetch(`https://api.weatherapi.com/v1/forecast.json?key=${config.apiKey}&q=${config.city}&days=${config.days}&lang=${config.lang}`);
+                const forecastData = await forecastResponse.json();
+                
+                // Update UI
+                updateCurrentWeather(currentData);
+                updateHourlyForecast(forecastData);
+                updateDailyForecast(forecastData);
+                
+                // Update last updated time
+                const updatedAt = new Date();
+                elements.lastUpdated.textContent = `Dernière mise à jour: ${formatTime(updatedAt)}`;
+                
+            } catch (error) {
+                console.error("Error fetching weather data:", error);
+                elements.currentCondition.textContent = "Erreur de chargement des données météo";
+            }
+        }
+
+        // Update current weather display
+        function updateCurrentWeather(data) {
+            const current = data.current;
+            const location = data.location;
+            
+            elements.currentTemp.textContent = `${Math.round(current.temp_c)}°`;
+            elements.currentCondition.textContent = current.condition.text;
+            elements.currentFeelsLike.textContent = `Ressenti: ${Math.round(current.feelslike_c)}°`;
+            elements.currentHumidity.textContent = `Humidité: ${current.humidity}%`;
+            elements.currentWind.textContent = `Vent: ${Math.round(current.wind_kph)} km/h`;
+            
+            // Set weather icon
+            const iconClass = weatherIcons[current.condition.text] || "fa-question";
+            elements.currentIcon.innerHTML = `<i class="fas
