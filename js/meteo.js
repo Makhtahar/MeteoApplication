@@ -25,4 +25,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   } catch (error) {
     console.error("Erreur lors de la récupération des données météo :", error);
   }
+    
+  // 🔁 Mise à jour automatique toutes les heures (3600000 ms)
+  setInterval(() => {
+    location.reload(); // Recharge la page pour rafraîchir la météo
+  }, 3600000);
 });
