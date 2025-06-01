@@ -1,16 +1,15 @@
-
 {
   "app": {
     "name": "Météo Transports",
     "version": "1.0.0",
-    "author": "Your Name",
-    "description": "Dashboard combining weather and public transport information"
+    "author": "Cyrian Grolier",
+    "description": "Dashboard combinant météo et informations transports"
   },
   "api": {
     "weather": {
       "provider": "weatherapi",
       "url": "https://api.weatherapi.com/v1",
-      "key": "YOUR_WEATHER_API_KEY",
+      "key": "c6e4748e070641abb1a83152250106",
       "endpoints": {
         "current": "/current.json",
         "forecast": "/forecast.json"
@@ -21,7 +20,7 @@
         {
           "name": "city_transport_api",
           "url": "https://api.citytransport.com/v1",
-          "key": "YOUR_TRANSPORT_API_KEY",
+          "key": "DUMMY_KEY",
           "endpoints": {
             "status": "/status"
           }
@@ -31,7 +30,7 @@
   },
   "defaults": {
     "city": "Paris",
-    "refreshInterval": 300000,
+    "refreshInterval": 3600000,
     "units": {
       "temperature": "C",
       "wind": "km/h",
@@ -62,7 +61,7 @@
     "hourlyForecast": true,
     "dailyForecast": true,
     "transportStatus": true,
-    "geolocation": true,
-    "citySelection": true
+    "geolocation": false,
+    "citySelection": false
   }
 }
